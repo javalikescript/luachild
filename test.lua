@@ -49,9 +49,7 @@ count = 0
 test(type(got), 'table')
 for k,v in pairs(got) do
   count = count + 1
-  if not v:match('[cC]:\\') then -- names could not match for windows directory ?
-    test(v, os.getenv(k))
-  end
+  test(v, os.getenv(k))
 end
 test(true, count > 0)
 
