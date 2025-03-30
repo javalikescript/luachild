@@ -40,5 +40,9 @@ int file_handler_creator(lua_State *L, const char * file_path, int get_path_from
 
 void lua_pushcfile(lua_State *L, FILE * f);
 
+FILE *check_file(lua_State *L, int idx, const char *argname);
+
+#define absindex(L,i) ((i)>0?(i):lua_gettop(L)+(i)+1)
+
 #endif // _LUA_CHILD_H_
 
