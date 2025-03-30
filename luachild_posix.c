@@ -57,8 +57,6 @@ extern char **environ;
 
 #endif
 
-#define absindex(L,i) ((i)>0?(i):lua_gettop(L)+(i)+1)
-
 #ifndef OPEN_MAX
 #define OPEN_MAX sysconf(_SC_OPEN_MAX)
 #endif
@@ -347,23 +345,6 @@ static void spawn_param_args(struct spawn_params *p)
   const char **argv = make_vector(p->L);
   if (!argv[0]) argv[0] = p->command;
   p->argv = argv;
-}
-
-static FILE *check_file(lua_State *L, int idx, const char *argname)
-{
-  FILE **pf;
-  if (idx > 0) pf = luaL_checkudata(L, idx, LUA_FILEHANDLE);
-  else {
-    idx = absindex(L, idx);
-    pf = lua_touserdata(L, idx);
-    luaL_getmetatable(L, LUA_FILEHANDLE);
-    if (!pf || !lua_getmetatable(L, idx) || !lua_rawequal(L, -1, -2))
-      luaL_error(L, "bad %s option (%s expected, got %s)",
-                 argname, LUA_FILEHANDLE, luaL_typename(L, idx));
-    lua_pop(L, 2);
-  }
-  if (!*pf) return luaL_error(L, "attempt to use a closed file"), NULL;
-  return *pf;
 }
 
 #define new_dirent(L) lua_newtable(L)

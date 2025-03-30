@@ -1,5 +1,6 @@
 #include "luachild.h"
 #ifdef USE_LUAPUC
+#if LUA_VERSION_NUM > 501
 
 #include <stdio.h>
 #include <errno.h>
@@ -20,8 +21,8 @@ size_t lua_value_length(lua_State *L, int index) {
 
 static int file_close(lua_State *L) {
   int result = 1;
-  FILE **p = (FILE **)luaL_checkudata(L, 1, LUA_FILEHANDLE);
-  if (!fclose(*p)) {
+  luaL_Stream *lf = luaL_checkudata(L, 1, LUA_FILEHANDLE);
+  if (!fclose(lf->f)) {
     lua_pushboolean(L, 1);
   } else {
     int en = errno;  /* calls to Lua API may change this value */
@@ -30,7 +31,7 @@ static int file_close(lua_State *L) {
     lua_pushinteger(L, en);
     result = 3;
   }
-  *p = NULL;
+  lf->f = NULL;
   return result;
 }
 
@@ -46,5 +47,23 @@ void lua_pushcfile(lua_State *L, FILE * f){
   lf->closef = &file_close;
 }
 
+FILE *check_file(lua_State *L, int idx, const char *argname)
+{
+  luaL_Stream *lf;
+  if (idx > 0) lf = luaL_checkudata(L, idx, LUA_FILEHANDLE);
+  else {
+    idx = absindex(L, idx);
+    lf = lua_touserdata(L, idx);
+    luaL_getmetatable(L, LUA_FILEHANDLE);
+    if (!lf || !lua_getmetatable(L, idx) || !lua_rawequal(L, -1, -2))
+      luaL_error(L, "bad %s option (%s expected, got %s)",
+                 argname, LUA_FILEHANDLE, luaL_typename(L, idx));
+    lua_pop(L, 2);
+  }
+  if (!lf->f) return luaL_error(L, "attempt to use a closed file"), NULL;
+  return lf->f;
+}
+
+#endif
 #endif // USE_LUAPUC
 

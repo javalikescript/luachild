@@ -76,5 +76,22 @@ void lua_pushcfile(lua_State *L, FILE * f){
   if (iof) *iof = f;
 }
 
+FILE *check_file(lua_State *L, int idx, const char *argname)
+{
+  FILE **pf;
+  if (idx > 0) pf = luaL_checkudata(L, idx, LUA_FILEHANDLE);
+  else {
+    idx = absindex(L, idx);
+    pf = lua_touserdata(L, idx);
+    luaL_getmetatable(L, LUA_FILEHANDLE);
+    if (!pf || !lua_getmetatable(L, idx) || !lua_rawequal(L, -1, -2))
+      luaL_error(L, "bad %s option (%s expected, got %s)",
+                 argname, LUA_FILEHANDLE, luaL_typename(L, idx));
+    lua_pop(L, 2);
+  }
+  if (!*pf) return luaL_error(L, "attempt to use a closed file"), NULL;
+  return *pf;
+}
+
 #endif // USE_LUAJIT
 

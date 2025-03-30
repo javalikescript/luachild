@@ -41,8 +41,6 @@ THE SOFTWARE.
 #include "lualib.h"
 #include "lauxlib.h"
 
-#define absindex(L,i) ((i)>0?(i):lua_gettop(L)+(i)+1)
-
 #define debug(...) /* fprintf(stderr, __VA_ARGS__) */
 #define debug_stack(L) /* #include "../lds.c" */
 
@@ -350,23 +348,6 @@ int process_tostring(lua_State *L)
     sprintf(buf, "process (%lu, %s)", (unsigned long)p->dwProcessId,
       p->status==-1 ? "running" : "terminated"));
   return 1;
-}
-
-static FILE *check_file(lua_State *L, int idx, const char *argname)
-{
-  FILE **pf;
-  if (idx > 0) pf = luaL_checkudata(L, idx, LUA_FILEHANDLE);
-  else {
-    idx = absindex(L, idx);
-    pf = lua_touserdata(L, idx);
-    luaL_getmetatable(L, LUA_FILEHANDLE);
-    if (!pf || !lua_getmetatable(L, idx) || !lua_rawequal(L, -1, -2))
-      luaL_error(L, "bad %s option (%s expected, got %s)",
-                 argname, LUA_FILEHANDLE, luaL_typename(L, idx));
-    lua_pop(L, 2);
-  }
-  if (!*pf) return luaL_error(L, "attempt to use a closed file"), NULL;
-  return *pf;
 }
 
 static void get_redirect(lua_State *L,
