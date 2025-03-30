@@ -109,9 +109,11 @@ int lc_environ(lua_State *L)
   lua_newtable(L);
   for (nam = envs; *nam; nam = end + 1) {
     end = strchr(val = strchr(nam, '=') + 1, '\0');
-    lua_pushlstring(L, nam, val - nam - 1);
-    lua_pushlstring(L, val, end - val);
-    lua_settable(L, -3);
+    if (*nam != '=') { // ignore environment variable starting with =
+      lua_pushlstring(L, nam, val - nam - 1);
+      lua_pushlstring(L, val, end - val);
+      lua_settable(L, -3);
+    }
   }
   return 1;
 }
