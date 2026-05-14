@@ -1,6 +1,6 @@
 #include "luachild.h"
 #ifdef USE_LUAPUC
-#if LUA_VERSION_NUM < 503
+#if LUA_VERSION_NUM == 501
 
 #include <stdio.h>
 #include <errno.h>
@@ -51,6 +51,6 @@ void lua_pushcfile(lua_State *L, FILE * f){
   lua_setfenv(L, -2);
 }
 
-#endif // LUA_VERSION_NUM < 503
+#endif // LUA_VERSION_NUM == 501
 #endif // USE_LUAPUC
 
