@@ -1,5 +1,6 @@
 #include "luachild.h"
 #ifdef USE_LUAPUC
+#if LUA_VERSION_NUM < 503
 
 #include <stdio.h>
 #include <errno.h>
@@ -45,5 +46,6 @@ void lua_pushcfile(lua_State *L, FILE * f){
   *pf = f;
 }
 
+#endif // LUA_VERSION_NUM < 503
 #endif // USE_LUAPUC
 
