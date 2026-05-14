@@ -108,11 +108,16 @@ int lc_environ(lua_State *L)
   if (!envs) return push_error(L);
   lua_newtable(L);
   for (nam = envs; *nam; nam = end + 1) {
-    end = strchr(val = strchr(nam, '=') + 1, '\0');
-    lua_pushlstring(L, nam, val - nam - 1);
-    lua_pushlstring(L, val, end - val);
-    lua_settable(L, -3);
+    end = strchr(nam, '\0');
+    val = strchr(nam + 1, '='); // some environment variables start with =
+    if (val) {
+      val++;
+      lua_pushlstring(L, nam, val - nam - 1);
+      lua_pushlstring(L, val, end - val);
+      lua_settable(L, -3);
+    }
   }
+  FreeEnvironmentStrings(envs);
   return 1;
 }
 
